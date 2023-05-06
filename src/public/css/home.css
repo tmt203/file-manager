@@ -1,0 +1,33 @@
+.fa,
+.fas {
+  color: #858585;
+}
+
+.fa-folder {
+  color: rgb(74, 158, 255);
+}
+
+i.fa,
+table i.fas {
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+i.action {
+  cursor: pointer;
+}
+
+a {
+  color: black;
+}
+
+.text-constraint {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.not-allowed {
+  cursor: not-allowed;
+}

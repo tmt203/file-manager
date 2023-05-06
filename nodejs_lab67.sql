@@ -1,0 +1,14 @@
+CREATE DATABASE nodejs_lab67;
+USE nodejs_lab67;
+
+DROP TABLE IF EXISTS user;
+CREATE TABLE users (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(30) NOT NULL, 
+    email VARCHAR(30) NOT NULL,
+    password VARCHAR(255) NOT NULL
+    
+);
+
+SELECT * FROM users;
+DESCRIBE users;

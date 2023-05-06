@@ -1,0 +1,248 @@
+<div>
+  <div class="container">
+    {{!-- Start: Header --}}
+    <div class="row align-items-center py-5">
+      <div class="col-6">
+        <h3>File Manager</h3>
+      </div>
+      <div class="col-6">
+        <div class="dropdown text-right">
+          Xin chào <a class="dropdown-toggle text-primary" data-toggle="dropdown">{{user.name}}</a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="#">
+              <i class="fas fa-info-circle"></i>
+              &nbsp;&nbsp;Cập nhật thông tin
+            </a>
+            <a class="dropdown-item" href="api/users/logout">
+              <i class="fas fa-sign-out-alt"></i>
+              &nbsp;&nbsp; Đăng xuất
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{!-- End: Header --}}
+
+    {{!-- Start: Navigation --}}
+    <ol class="breadcrumb">
+      {{{navigation currentDir user.userRoot}}}
+    </ol>
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text">
+          <span class="fa fa-search"></span>
+        </span>
+      </div>
+      <input type="text" class="form-control" placeholder="Search">
+    </div>
+    {{!-- End: Navigation --}}
+
+    {{!-- Start: Alert message --}}
+    {{#if message}}
+    <div class="form-group">
+      <div class="alert alert-{{message.type}} alert-dismissible fade show">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{message.message}}
+      </div>
+    </div>
+    {{/if}}
+    {{!-- End: Alert message --}}
+
+    {{!-- Start: Upload file --}}
+    <div class="border rounded mb-3 mt-3 p-3">
+      <h4>File upload</h4>
+      <form id="upload-form" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+        <input type="hidden" name="email" value="{{user.email}}">
+        <input type="hidden" name="currentPath" value="{{currentDir}}">
+        <div class="form-group">
+          <div class="custom-file">
+            <input name="attachment" type="file" class="custom-file-input" id="attachment">
+            <label class="custom-file-label" for="attachment">Choose file</label>
+          </div>
+        </div>
+        <div id="progress-bar-container" class="form-group d-none">
+          <div class="progress" style="height:5px">
+            <div class="progress-bar bg-success" style="width:0%;height:10px"></div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-success px-5">Upload</button>
+      </form>
+    </div>
+    {{!-- End: Upload file --}}
+
+    {{!-- Start: New Folder & Create file --}}
+    <div class="btn-group my-3">
+      <button type="button" class="btn btn-light border" data-toggle="modal" data-target="#new-folder-dialog">
+        <i class="fas fa-folder-plus"></i> New folder
+      </button>
+      <button type="button" class="btn btn-light border" data-toggle="modal" data-target="#new-file-dialog">
+        <i class="fas fa-file"></i> Create text file
+      </button>
+    </div>
+    {{!-- End: New Folder & Create file --}}
+
+    {{!-- Start: Table files --}}
+    <table id="table-files" class="table table-hover border">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Size</th>
+          <th>Last modified</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tbody>
+        {{#each files}}
+        <tr>
+          <td>
+            <div class="text-constraint">
+              {{{this.icon}}}
+              {{#if this.isDirectory}}
+              <a href="?dir={{this.subPath}}">{{this.name}}</a>
+              {{else}}
+              <a href="{{../user.email}}{{this.subPath}}">{{this.name}}</a>
+              {{/if}}
+            </div>
+          </td>
+          <td>{{this.type}}</td>
+          <td>{{this.size}}</td>
+          <td>{{this.lastModified}}</td>
+          <td>
+            <span>
+              {{#if this.isDirectory}}
+              <a href="/api/files/downloadFolder?folderPath={{../currentDir}}\\{{this.name}}">
+                <i class="fa fa-download action"></i>
+              </a>
+              {{else}}
+              <a href="/api/files/downloadFile?filePath={{../currentDir}}\\{{this.name}}">
+                <i class="fa fa-download action"></i>
+              </a>
+              {{/if}}
+              {{#if this.isDirectory}}
+              <i class="fa fa-edit not-allowed"></i>
+              {{else}}
+              <i class="fa fa-edit action" data-toggle="modal" data-target="#confirm-rename"
+                data-name="{{this.name}}"></i>
+              {{/if}}
+              <i class="fa fa-trash action" data-toggle="modal" data-target="#confirm-delete" data-name="{{this.name}}"
+                data-path="{{../currentDir}}\\{{this.name}}"></i>
+            </span>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+      </tbody>
+    </table>
+    {{!-- End: Table files --}}
+
+  </div>
+
+
+  <!-- Delete dialog -->
+  <div class="modal fade" id="confirm-delete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="delete-form" method="post">
+          <div class="modal-header">
+            <h4 class="modal-title">Xóa tập tin</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <div class="modal-body">
+            Bạn có chắc rằng muốn xóa tập tin <strong></strong>
+            <input type="hidden" name="path">
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-danger">Xóa</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Không</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Rename file dialog -->
+  <div class="modal fade" id="confirm-rename">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="rename-form" method="post">
+          <div class="modal-header">
+            <h4 class="modal-title">Đổi tên</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <div class="modal-body">
+            <p>Nhập tên mới cho tập tin <strong></strong></p>
+            <input type="text" placeholder="Nhập tên mới" name="newFileName" value="" class="form-control" />
+          </div>
+
+          <div class="modal-footer">
+            <input type="hidden" name="currentDir" value="{{currentDir}}">
+            <input type="hidden" name="currentFileName">
+            <button type="submit" class="btn btn-primary">Lưu</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- New file dialog -->
+  <div class="modal fade" id="new-file-dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="newFileForm" method="post">
+          <div class="modal-header">
+            <h4 class="modal-title">Tạo tập tin mới</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="name">File Name</label>
+              <input type="text" placeholder="File name" class="form-control" id="name" name="fileName" required />
+            </div>
+            <div class="form-group">
+              <label for="content">Nội dung</label>
+              <textarea rows="10" id="content" class="form-control" placeholder="Nội dung" name="content"></textarea>
+            </div>
+            <input type="hidden" name="currentDir" value="{{currentDir}}">
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Lưu</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- message dialog -->
+  <div class="modal fade" id="message-dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h4 class="modal-title">Xóa file</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p>Bạn không được cấp quyền để xóa tập tin/thư mục này</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-info" data-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
