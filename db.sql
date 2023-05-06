@@ -1,0 +1,12 @@
+CREATE DATABASE file_manager;
+USE file_manager;
+
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(30) NOT NULL, 
+    email VARCHAR(30) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+    
+);
